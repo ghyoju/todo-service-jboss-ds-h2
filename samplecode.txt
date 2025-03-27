@@ -1,4 +1,6 @@
-                <datasource jndi-name="java:/H2DS" pool-name="H2DSPool">
+http://localhost:8080/todo-soap-service-2-1.0-SNAPSHOT/TodoService?wsdl
+
+<datasource jndi-name="java:/H2DS" pool-name="H2DSPool">
                     <connection-url>jdbc:h2:mem:todo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
                     <driver>h2</driver>
                     <security>
