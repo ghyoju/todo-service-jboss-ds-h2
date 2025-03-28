@@ -141,3 +141,20 @@ public class YourClass {
         }
     }
 }
+-------------------
+import jakarta.persistence.*;
+
+@Entity
+public class ExampleEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Convert(converter = BooleanYesNoConverter.class) // Replaces @Type
+    private Boolean active;
+
+    // Getters and Setters
+}
+
+
