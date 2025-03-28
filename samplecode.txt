@@ -120,3 +120,24 @@ datasources
                     </driver>
                 </drivers>
             </datasources>
+----------------
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class YourClass {
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        SessionFactory sessionFactory = context.getBean("sessionFactory", SessionFactory.class);
+
+        // Open a session
+        try (Session session = sessionFactory.openSession()) {
+            // Execute your native query
+            String sql = "SELECT * FROM your_table WHERE some_condition";
+            Object result = session.createNativeQuery(sql).getResultList();
+            System.out.println(result);
+        }
+    }
+}
