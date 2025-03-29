@@ -1,303 +1,84 @@
-http://localhost:8080/todo-soap-service-2-1.0-SNAPSHOT/TodoService?wsdl
-
-<datasource jndi-name="java:/H2DS" pool-name="H2DSPool">
-                    <connection-url>jdbc:h2:mem:todo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
-                    <driver>h2</driver>
-                    <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
-                    </security>
-                </datasource>
-
-                <drivers>
-                    <driver name="h2" module="com.h2database.h2">
-                        <driver-class>org.h2.Driver</driver-class>
-                    </driver>
-                </drivers>
-
-http://localhost:8080/todo-service-1.0-SNAPSHOT/TodoService
-
-@Value("#{ssaDataMasterCitizenshipStatusScalerMap}")
-private HashMap<String, org.hibernate.type.BasicTypeReference> columnTypeHashMap;
-
-<util:map id="ssaDataMasterCitizenshipStatusScalerMap" map-class="java.util.HashMap" key-type="java.lang.String" value-type="org.hibernate.type.BasicTypeReference">
-    <entry key="tin" value="#{T(org.hibernate.type.StandardBasicTypes).STRING}"/>
-    <entry key="validityCd" value="#{T(org.hibernate.type.StandardBasicTypes).STRING}"/>
-    <entry key="citizenshipInd" value="#{T(org.hibernate.type.StandardBasicTypes).STRING}"/>
-</util:map>
-
--------------------
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.example</groupId>
-    <artifactId>wsdl-to-java-example</artifactId>
+    <artifactId>cxf-java21-example</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <cxf.version>4.4.0.fuse-redhat-00014</cxf.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jaxb.version>2.3.1</jaxb.version>
     </properties>
+
+    <dependencies>
+        <!-- JAXB API -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <!-- JAXB Implementation -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>${jaxb.version}</version>
+        </dependency>
+        <!-- JAX-WS API (for wsdl2java) -->
+        <dependency>
+            <groupId>javax.xml.ws</groupId>
+            <artifactId>jaxws-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
-            <!-- Maven Compiler Plugin for Java 21 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-
             <!-- CXF Codegen Plugin -->
             <plugin>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-codegen-plugin</artifactId>
                 <version>${cxf.version}</version>
+                <dependencies>
+                    <!-- JAXB XJC for code generation -->
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-xjc</artifactId>
+                        <version>${jaxb.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>generate-sources</id>
                         <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
                         <configuration>
                             <sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
                             <wsdlOptions>
                                 <wsdlOption>
-                                    <wsdl>${basedir}/src/main/resources/wsdl/sample.wsdl</wsdl>
-                                    <!-- JAXB Binding File -->
+                                    <wsdl>${project.basedir}/src/main/resources/wsdl/sample.wsdl</wsdl>
                                     <bindingFiles>
-                                        <bindingFile>${basedir}/src/main/resources/bindings/jaxb-bindings.xml</bindingFile>
+                                        <bindingFile>${project.basedir}/src/main/resources/bindings.xml</bindingFile>
                                     </bindingFiles>
-                                    <!-- Extra Arguments -->
-                                    <extraargs>
-                                        <extraarg>-verbose</extraarg>
-                                        <extraarg>-p</extraarg>
-                                        <extraarg>com.example.generated</extraarg> <!-- Package name -->
-                                        <extraarg>-xjc-Xts</extraarg> <!-- Enable toString extension -->
-                                    </extraargs>
                                 </wsdlOption>
                             </wsdlOptions>
-                            <!-- Encoding for generated files -->
-                            <encoding>UTF-8</encoding>
                         </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
                     </execution>
                 </executions>
-                <!-- Dependencies for Java 21 and JAXB -->
-                <dependencies>
-                    <!-- JAXB API (Jakarta EE) -->
-                    <dependency>
-                        <groupId>jakarta.xml.bind</groupId>
-                        <artifactId>jakarta.xml.bind-api</artifactId>
-                        <version>4.0.2</version>
-                    </dependency>
-                    <!-- JAXB Runtime -->
-                    <dependency>
-                        <groupId>org.glassfish.jaxb</groupId>
-                        <artifactId>jaxb-runtime</artifactId>
-                        <version>4.0.5</version>
-                    </dependency>
-                    <!-- CXF XJC Plugin for toString (optional) -->
-                    <dependency>
-                        <groupId>org.apache.cxf.xjcplugins</groupId>
-                        <artifactId>cxf-xjc-ts</artifactId>
-                        <version>4.1.0</version>
-                    </dependency>
-                </dependencies>
+            </plugin>
+            <!-- Ensure Java 21 compilation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <!-- CXF Core -->
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-core</artifactId>
-            <version>${cxf.version}</version>
-        </dependency>
-        <!-- Jakarta XML Binding API -->
-        <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-        <!-- JAXB Runtime -->
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.5</version>
-        </dependency>
-    </dependencies>
 </project>
-
-
-module.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="urn:jboss:module:1.9" name="com.oracle">
-    <resources>
-        <resource-root path="ojdbc11.jar"/>
-    </resources>
-    <dependencies>
-        <module name="javax.api"/>
-        <module name="javax.transaction.api"/>
-    </dependencies>
-</module>
-
-standalone.xml
-drivers
-<driver name="oracle" module="com.oracle">
-    <driver-class>oracle.jdbc.OracleDriver</driver-class>
-</driver>
-datasources
-<datasource jndi-name="java:/OracleDS" pool-name="OracleDS" enabled="true" use-java-context="true">
-    <connection-url>jdbc:oracle:thin:@//localhost:1521/ORCL</connection-url>
-    <driver>oracle</driver>
-    <security>
-        <user-name>your_username</user-name>
-        <password>your_password</password>
-    </security>
-    <pool>
-        <min-pool-size>5</min-pool-size>
-        <max-pool-size>20</max-pool-size>
-    </pool>
-    <validation>
-        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
-        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
-        <stale-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker"/>
-    </validation>
-</datasource>
-
-===================================
-<subsystem xmlns="urn:jboss:domain:datasources:8.0">
-    <datasources>
-        <xa-datasource jndi-name="java:/jdbc/OracleDS" pool-name="OracleDS" enabled="true" use-java-context="true">
-            <xa-datasource-property name="URL">
-                jdbc:oracle:thin:@//localhost:1521/ORCL
-            </xa-datasource-property>
-            <xa-datasource-property name="User">
-                your_username
-            </xa-datasource-property>
-            <xa-datasource-property name="Password">
-                your_password
-            </xa-datasource-property>
-            <driver>oracle</driver>
-            <pool>
-                <min-pool-size>5</min-pool-size>
-                <max-pool-size>20</max-pool-size>
-            </pool>
-            <validation>
-                <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker"/>
-                <validate-on-match>true</validate-on-match>
-                <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter"/>
-            </validation>
-        </xa-datasource>
-        <drivers>
-            <driver name="oracle" module="com.oracle.jdbc">
-                <xa-datasource-class>oracle.jdbc.xa.client.OracleXADataSource</xa-datasource-class>
-            </driver>
-        </drivers>
-    </datasources>
-</subsystem>
-
-
-
-<datasources>
-                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true" statistics-enabled="${wildfly.datasources.statistics-enabled:${wildfly.statistics-enabled:false}}">
-                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=${wildfly.h2.compatibility.mode:REGULAR}</connection-url>
-                    <driver>h2</driver>
-                    <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
-                    </security>
-                </datasource>
-                <datasource jndi-name="java:/TodoDS" pool-name="TodoDSPool">
-                    <connection-url>jdbc:h2:mem:todo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
-                    <driver>h2</driver>
-                    <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
-                    </security>
-                </datasource>
-                <drivers>
-                    <driver name="h2" module="com.h2database.h2">
-                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
-                    </driver>
-                </drivers>
-            </datasources>
-----------------
-
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-public class YourClass {
-    public static void main(String[] args) {
-        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        SessionFactory sessionFactory = context.getBean("sessionFactory", SessionFactory.class);
-
-        // Open a session
-        try (Session session = sessionFactory.openSession()) {
-            // Execute your native query
-            String sql = "SELECT * FROM your_table WHERE some_condition";
-            Object result = session.createNativeQuery(sql).getResultList();
-            System.out.println(result);
-        }
-    }
-}
--------------------
-
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-
-@Converter(autoApply = true)
-public class BooleanYesNoConverter implements AttributeConverter<Boolean, String> {
-
-    @Override
-    public String convertToDatabaseColumn(Boolean attribute) {
-        return (attribute != null && attribute) ? "Y" : "N";
-    }
-
-    @Override
-    public Boolean convertToEntityAttribute(String dbData) {
-        return "Y".equalsIgnoreCase(dbData);
-    }
-}
-
-import jakarta.persistence.*;
-
-@Entity
-public class ExampleEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Convert(converter = BooleanYesNoConverter.class) // Replaces @Type
-    private Boolean active;
-
-    // Getters and Setters
-}
-
-<?xml version="1.0" encoding="UTF-8"?>
-<jaxb:bindings
-    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    version="2.1">
-    <jaxb:globalBindings>
-        <xjc:javaType
-            name="java.lang.Boolean"
-            xmlType="xs:boolean"
-            adapter="com.example.BooleanAdapter"/>
-    </jaxb:globalBindings>
-</jaxb:bindings>
-
