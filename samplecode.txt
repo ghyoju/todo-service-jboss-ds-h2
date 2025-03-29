@@ -287,4 +287,17 @@ public class ExampleEntity {
     // Getters and Setters
 }
 
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    version="2.1">
+    <jaxb:globalBindings>
+        <xjc:javaType
+            name="java.lang.Boolean"
+            xmlType="xs:boolean"
+            adapter="com.example.BooleanAdapter"/>
+    </jaxb:globalBindings>
+</jaxb:bindings>
 
