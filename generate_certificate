@@ -1,0 +1,57 @@
+
+Setup Environment
+1.
+export JAVA_HOME="/c/Program Files/Java/jdk-21"  # Windows example
+# OR
+export JAVA_HOME="/usr/lib/jvm/java-21-openjdk"  # Linux example
+
+2.
+export PATH="$JAVA_HOME/bin:$PATH"
+
+3.
+java -version
+
+4.
+cd JAVA_HOME
+
+Generate Certificate
+5. 
+keytool -genkeypair -alias jboss -keyalg RSA -keysize 2048 -validity 365 -keystore server.keystore -storepass password -keypass password
+
+6.
+ls -l server.keystore  # Should show the file (use `dir` if on Windows Git Bash)
+
+Export Certificate
+7.
+keytool -export -alias jboss -keystore server.keystore -file server.crt -storepass password
+8.
+ls -l server.crt
+
+Import Certifacate into Javas Default Truststore
+9.
+keytool -import -trustcacerts -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit -alias jboss-cert -file server.crt
+10.
+keytool -list -keystore "$JAVA_HOME/lib/security/cacerts" -storepass changeit | grep jboss-cert
+
+Configure JBOSS to use the Keystore
+11.
+mv server.keystore standalone/configuration/
+
+12.
+Open standalone/configuration/standalone.xml in an editor (e.g., vim or notepad).
+Find or add a <security-realm> for SSL under <security-realms>
+<security-realm name="SSLRealm">
+    <server-identities>
+        <ssl>
+            <keystore path="server.keystore" relative-to="jboss.server.config.dir" keystore-password="password"/>
+        </ssl>
+    </server-identities>
+</security-realm>
+
+13
+Associate it with the HTTPS listener (under <subsystem xmlns="urn:jboss:domain:undertow:13.0">):
+<https-listener name="https" socket-binding="https" security-realm="SSLRealm"/>
+
+
+
+
