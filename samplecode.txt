@@ -4,14 +4,10 @@
                xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
                jaxb:extensionBindingPrefixes="xjc"
                version="3.0">
-  <jaxb:bindings schemaLocation="wsdl/todo.wsdl#types1" node="//xs:schema">
+
     <jaxb:globalBindings>
-      <xjc:javaType name="java.lang.Boolean"
-                    xmlType="xs:string"
-                    adapter="com.example.todo.BooleanAdapter"/>
+        <xjc:javaType name="java.lang.Boolean"
+                      xmlType="xs:boolean"
+                      adapter="com.example.todo.adapter.YesNoAdapter"/>
     </jaxb:globalBindings>
-    <jaxb:schemaBindings>
-      <jaxb:package name="com.example.todo"/>
-    </jaxb:schemaBindings>
-  </jaxb:bindings>
 </jaxb:bindings>
