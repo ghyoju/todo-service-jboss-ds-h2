@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jaxb:bindings
-    xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    xmlns:xjc="https://jakarta.ee/xml/ns/jaxb/xjc"
-    jaxb:extensionBindingPrefixes="xjc"
-    version="3.0">
-    <!-- Apply globally if no specific schema node is targeted -->
+<jaxb:bindings xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               jaxb:extensionBindingPrefixes="xjc"
+               version="3.0">
+  <jaxb:bindings schemaLocation="wsdl/todo.wsdl#types1" node="//xs:schema">
     <jaxb:globalBindings>
-        <xjc:javaType
-            name="java.lang.Boolean"
-            xmlType="xs:boolean"
-            adapter="com.example.BooleanAdapter"/>
+      <xjc:javaType name="java.lang.Boolean"
+                    xmlType="xs:string"
+                    adapter="com.example.todo.BooleanAdapter"/>
     </jaxb:globalBindings>
-
+    <jaxb:schemaBindings>
+      <jaxb:package name="com.example.todo"/>
+    </jaxb:schemaBindings>
+  </jaxb:bindings>
 </jaxb:bindings>
