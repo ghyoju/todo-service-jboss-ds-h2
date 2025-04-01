@@ -40,19 +40,27 @@
 
 --------------
 
-<dependencies>
-    <!-- SLF4J API -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>2.0.12</version>
-    </dependency>
+# Set the root logger level and appenders
+log4j.rootLogger=INFO, CONSOLE, FILE
 
-    <!-- JBoss Logging SLF4J Bridge -->
-    <dependency>
-        <groupId>org.jboss.logging</groupId>
-        <artifactId>jboss-logging-slf4j</artifactId>
-        <version>2.2.1.Final</version>
-    </dependency>
-</dependencies>
+# Console Appender Configuration
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1} - %m%n
+
+# File Appender Configuration
+log4j.appender.FILE=org.apache.log4j.FileAppender
+log4j.appender.FILE.File=logs/application.log
+log4j.appender.FILE.Append=true
+log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1} - %m%n
+
+# Logger specific settings
+log4j.logger.com.example=DEBUG, FILE
+log4j.additivity.com.example=false
+
+# Suppress unnecessary logs
+log4j.logger.org.hibernate=ERROR
+log4j.logger.org.springframework=WARN
+
 
