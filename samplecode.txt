@@ -63,11 +63,68 @@ log4j.additivity.com.example=false
 log4j.logger.org.hibernate=ERROR
 log4j.logger.org.springframework=WARN
 ----------------------------------
-return results.stream()
-                .map(tuple -> new TodoDTO(
-                        tuple.get("id", Long.class),         // Column name "id" from the table
-                        tuple.get("title", String.class),    // Column name "title" from the table
-                        tuple.get("completed", Boolean.class) // Column name "completed" from the table
-                ))
-                .collect(Collectors.toList());
+#!/bin/bash
+
+# Array of directories containing Maven projects (add your project paths here)
+PROJECTS=(
+    "/path/to/project1"
+    "/path/to/project2"
+    "/path/to/project3"
+)
+
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Function to run mvn clean install in a directory
+run_maven() {
+    local dir=$1
+    echo -e "${GREEN}Running 'mvn clean install' in $dir${NC}"
+    cd "$dir" || {
+        echo -e "${RED}Failed to change to directory: $dir${NC}"
+        return 1
+    }
+    
+    mvn clean install
+    local status=$?
+    
+    if [ $status -eq 0 ]; then
+        echo -e "${GREEN}Successfully completed in $dir${NC}"
+    else
+        echo -e "${RED}Failed in $dir with status $status${NC}"
+    fi
+    
+    return $status
+}
+
+# Main execution
+echo "Starting Maven builds..."
+echo "------------------------"
+
+# Track overall success
+overall_status=0
+
+# Loop through projects
+for project in "${PROJECTS[@]}"; do
+    if [ -d "$project" ]; then
+        run_maven "$project"
+        if [ $? -ne 0 ]; then
+            overall_status=1
+        fi
+    else
+        echo -e "${RED}Directory not found: $project${NC}"
+        overall_status=1
+    fi
+    echo "------------------------"
+done
+
+# Final status
+if [ $overall_status -eq 0 ]; then
+    echo -e "${GREEN}All builds completed successfully!${NC}"
+else
+    echo -e "${RED}Some builds failed.${NC}"
+fi
+
+exit $overall_status
 
