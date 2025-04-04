@@ -62,5 +62,12 @@ log4j.additivity.com.example=false
 # Suppress unnecessary logs
 log4j.logger.org.hibernate=ERROR
 log4j.logger.org.springframework=WARN
-
+----------------------------------
+return results.stream()
+                .map(tuple -> new TodoDTO(
+                        tuple.get("id", Long.class),         // Column name "id" from the table
+                        tuple.get("title", String.class),    // Column name "title" from the table
+                        tuple.get("completed", Boolean.class) // Column name "completed" from the table
+                ))
+                .collect(Collectors.toList());
 
