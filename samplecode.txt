@@ -1,3 +1,5 @@
+-Dmailcap.provider.file=C:\Program Files\RedHat\Java-21-0.6.71\conf\mailcap
+-------------------------------
 text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain
 multipart/*;; x-java-content-handler=org.eclipse.angus.mail.handlers.multipart_mixed
 -----------------
