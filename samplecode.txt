@@ -1,3 +1,35 @@
+
+<!-- CXF Codegen Plugin -->
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>${cxf.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>${project.basedir}/src/main/resources/your-service.wsdl</wsdl>
+                                    <extraargs>
+                                        <extraarg>-verbose</extraarg>
+                                        <extraarg>-validate</extraarg>
+                                        <extraarg>-autoNameResolution</extraarg>
+                                        <extraarg>-b</extraarg>
+                                        <extraarg>${project.basedir}/src/main/resources/bindings.xml</extraarg>
+                                    </extraargs>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+------------------------------------------------------------------------
 -Dmailcap.provider.file=C:\Program Files\RedHat\Java-21-0.6.71\conf\mailcap
 -------------------------------
 text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain
