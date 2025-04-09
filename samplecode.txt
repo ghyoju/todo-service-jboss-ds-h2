@@ -1,4 +1,18 @@
-
+List<PostDTO> result = entityManager.createNativeQuery(sql)
+    .setParameter("titlePattern", "%" + titlePattern + "%")
+    .unwrap(NativeQuery.class)
+    .setTupleTransformer((tuple, aliases) -> {
+        Long id = ((Number) tuple[0]).longValue();
+        String title = (String) tuple[1];
+        return new PostDTO(id, title);
+    })
+    .setResultListTransformer(list -> 
+        list.stream()
+            .filter(dto -> dto.getTitle().length() > 5) // Example filter
+            .collect(Collectors.toList())
+    )
+    .getResultList();
+---------------
 Tuple tuple = results.get(0);
 for (TupleElement<?> element : tuple.getElements()) {
     System.out.println("Alias: " + element.getAlias() + ", Type: " + element.getJavaType());
