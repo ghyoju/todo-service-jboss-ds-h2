@@ -1,4 +1,9 @@
 
+Tuple tuple = results.get(0);
+for (TupleElement<?> element : tuple.getElements()) {
+    System.out.println("Alias: " + element.getAlias() + ", Type: " + element.getJavaType());
+}
+--------------------------
 <!-- CXF Codegen Plugin -->
             <plugin>
                 <groupId>org.apache.cxf</groupId>
