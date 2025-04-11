@@ -1,3 +1,31 @@
+
+
+@Transactional
+    public List<MyErrDTO> findErrorsByTableAndYear(String tableName, String year) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<MyErrDTO> query = cb.createQuery(MyErrDTO.class);
+        Root<MyErr> root = query.from(MyErr.class);
+
+        // Access embedded ID fields
+        Path<String> tableNamePath = root.get("errorId").get("tableName");
+        Path<String> columnNamePath = root.get("errorId").get("columnName");
+        Path<String> yearPath = root.get("errorId").get("applicableCoverageYear");
+
+        // Construct DTO
+        query.select(cb.construct(MyErrDTO.class, tableNamePath, columnNamePath, yearPath));
+
+        // Add conditions
+        query.where(
+            cb.equal(tableNamePath, tableName),
+            cb.equal(yearPath, year)
+        );
+
+        return entityManager.createQuery(query).getResultList();
+    }
+
+
+-----------------------
+
 List<PostDTO> result = entityManager.createNativeQuery(sql)
     .setParameter("titlePattern", "%" + titlePattern + "%")
     .unwrap(NativeQuery.class)
