@@ -1,17 +1,35 @@
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import java.util.Arrays;
 
-public class JBossClient {
-    public static void main(String[] args) throws Exception {
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket socket = (SSLSocket) factory.createSocket("localhost", 8443);
-        socket.setEnabledProtocols(new String[]{"TLSv1.2"});
-        socket.setEnabledCipherSuites(new String[]{"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"});
-        socket.startHandshake();
-        System.out.println("Connected!");
-        socket.close();
+public class CipherSuites {
+    public static void main(String[] args) {
+        try {
+            // Create an SSLContext for TLS
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, null, null);
+
+            // Get the factory from the SSLContext
+            SSLSocketFactory factory = sslContext.getSocketFactory();
+
+            // Create a temporary socket to get enabled/supported ciphers
+            try (SSLSocket socket = (SSLSocket) factory.createSocket()) {
+                String[] supportedCiphers = socket.getSupportedCipherSuites();
+                String[] enabledCiphers = socket.getEnabledCipherSuites();
+
+                System.out.println("Supported Ciphers:");
+                Arrays.stream(supportedCiphers).forEach(System.out::println);
+
+                System.out.println("\nEnabled Ciphers:");
+                Arrays.stream(enabledCiphers).forEach(System.out::println);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
+
 
 
 import javax.net.ssl.SSLSocket;
