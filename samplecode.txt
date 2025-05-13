@@ -1,233 +1,51 @@
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
-
-@Transactional
-    public List<MyErrDTO> findErrorsByTableAndYear(String tableName, String year) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<MyErrDTO> query = cb.createQuery(MyErrDTO.class);
-        Root<MyErr> root = query.from(MyErr.class);
-
-        // Access embedded ID fields
-        Path<String> tableNamePath = root.get("errorId").get("tableName");
-        Path<String> columnNamePath = root.get("errorId").get("columnName");
-        Path<String> yearPath = root.get("errorId").get("applicableCoverageYear");
-
-        // Construct DTO
-        query.select(cb.construct(MyErrDTO.class, tableNamePath, columnNamePath, yearPath));
-
-        // Add conditions
-        query.where(
-            cb.equal(tableNamePath, tableName),
-            cb.equal(yearPath, year)
-        );
-
-        return entityManager.createQuery(query).getResultList();
-    }
-
-
------------------------
-
-List<PostDTO> result = entityManager.createNativeQuery(sql)
-    .setParameter("titlePattern", "%" + titlePattern + "%")
-    .unwrap(NativeQuery.class)
-    .setTupleTransformer((tuple, aliases) -> {
-        Long id = ((Number) tuple[0]).longValue();
-        String title = (String) tuple[1];
-        return new PostDTO(id, title);
-    })
-    .setResultListTransformer(list -> 
-        list.stream()
-            .filter(dto -> dto.getTitle().length() > 5) // Example filter
-            .collect(Collectors.toList())
-    )
-    .getResultList();
----------------
-Tuple tuple = results.get(0);
-for (TupleElement<?> element : tuple.getElements()) {
-    System.out.println("Alias: " + element.getAlias() + ", Type: " + element.getJavaType());
-}
---------------------------
-<!-- CXF Codegen Plugin -->
-            <plugin>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-codegen-plugin</artifactId>
-                <version>${cxf.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <wsdl>${project.basedir}/src/main/resources/your-service.wsdl</wsdl>
-                                    <extraargs>
-                                        <extraarg>-verbose</extraarg>
-                                        <extraarg>-validate</extraarg>
-                                        <extraarg>-autoNameResolution</extraarg>
-                                        <extraarg>-b</extraarg>
-                                        <extraarg>${project.basedir}/src/main/resources/bindings.xml</extraarg>
-                                    </extraargs>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-------------------------------------------------------------------------
--Dmailcap.provider.file=C:\Program Files\RedHat\Java-21-0.6.71\conf\mailcap
--------------------------------
-text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain
-multipart/*;; x-java-content-handler=org.eclipse.angus.mail.handlers.multipart_mixed
------------------
-<?xml version="1.0" encoding="UTF-8"?>
-<jaxb:bindings xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
-               xmlns:xs="http://www.w3.org/2001/XMLSchema"
-               xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
-               jaxb:extensionBindingPrefixes="xjc"
-               version="3.0">
-
-    <jaxb:globalBindings>
-        <xjc:javaType name="java.lang.Boolean"
-                      xmlType="xs:boolean"
-                      adapter="com.example.todo.adapter.YesNoAdapter"/>
-    </jaxb:globalBindings>
-</jaxb:bindings>
-
-
----------------
-<dependencies>
-    <!-- SLF4J API -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>2.0.12</version>  <!-- Use latest version -->
-    </dependency>
-
-    <!-- SLF4J-JUL Bridge -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>jul-to-slf4j</artifactId>
-        <version>2.0.12</version>
-    </dependency>
-
-    <!-- SLF4J JBoss LogManager Adapter -->
-    <dependency>
-        <groupId>org.jboss.slf4j</groupId>
-        <artifactId>slf4j-jboss-logmanager</artifactId>
-        <version>2.0.0.Final</version>
-    </dependency>
-</dependencies>
-
-
---------------
-
-# Set the root logger level and appenders
-log4j.rootLogger=INFO, CONSOLE, FILE
-
-# Console Appender Configuration
-log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
-log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
-log4j.appender.CONSOLE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1} - %m%n
-
-# File Appender Configuration
-log4j.appender.FILE=org.apache.log4j.FileAppender
-log4j.appender.FILE.File=logs/application.log
-log4j.appender.FILE.Append=true
-log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
-log4j.appender.FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1} - %m%n
-
-# Logger specific settings
-log4j.logger.com.example=DEBUG, FILE
-log4j.additivity.com.example=false
-
-# Suppress unnecessary logs
-log4j.logger.org.hibernate=ERROR
-log4j.logger.org.springframework=WARN
-----------------------------------
-#!/bin/bash
-
-# Array of directories containing Maven projects (add your project paths here)
-PROJECTS=(
-    "/path/to/project1"
-    "/path/to/project2"
-    "/path/to/project3"
-)
-
-# Colors for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
-# Function to run mvn clean install in a directory
-run_maven() {
-    local dir=$1
-    echo -e "${GREEN}Running 'mvn clean install' in $dir${NC}"
-    cd "$dir" || {
-        echo -e "${RED}Failed to change to directory: $dir${NC}"
-        return 1
-    }
-    
-    mvn clean install
-    local status=$?
-    
-    if [ $status -eq 0 ]; then
-        echo -e "${GREEN}Successfully completed in $dir${NC}"
-    else
-        echo -e "${RED}Failed in $dir with status $status${NC}"
-    fi
-    
-    return $status
-}
-
-# Main execution
-echo "Starting Maven builds..."
-echo "------------------------"
-
-# Track overall success
-overall_status=0
-
-# Loop through projects
-for project in "${PROJECTS[@]}"; do
-    if [ -d "$project" ]; then
-        run_maven "$project"
-        if [ $? -ne 0 ]; then
-            overall_status=1
-        fi
-    else
-        echo -e "${RED}Directory not found: $project${NC}"
-        overall_status=1
-    fi
-    echo "------------------------"
-done
-
-# Final status
-if [ $overall_status -eq 0 ]; then
-    echo -e "${GREEN}All builds completed successfully!${NC}"
-else
-    echo -e "${RED}Some builds failed.${NC}"
-fi
-
-exit $overall_status
-
-----------------
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public class MyDate extends XmlAdapter<String, Date> {
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-    @Override
-    public Date unmarshal(String v) throws Exception {
-        return dateFormat.parse(v);
-    }
-
-    @Override
-    public String marshal(Date v) throws Exception {
-        return dateFormat.format(v);
+public class JBossClient {
+    public static void main(String[] args) throws Exception {
+        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket socket = (SSLSocket) factory.createSocket("localhost", 8443);
+        socket.setEnabledProtocols(new String[]{"TLSv1.2"});
+        socket.setEnabledCipherSuites(new String[]{"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"});
+        socket.startHandshake();
+        System.out.println("Connected!");
+        socket.close();
     }
 }
+
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import java.util.Arrays;
+
+public class SSLCheck {
+    public static void main(String[] args) throws Exception {
+        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket socket = (SSLSocket) factory.createSocket();
+        System.out.println("Supported Protocols: " + Arrays.toString(socket.getSupportedProtocols()));
+        System.out.println("Enabled Protocols: " + Arrays.toString(socket.getEnabledProtocols()));
+        System.out.println("Supported Ciphers: " + Arrays.toString(socket.getSupportedCipherSuites()));
+        System.out.println("Enabled Ciphers: " + Arrays.toString(socket.getEnabledCipherSuites()));
+    }
+}
+
+
+-------
+Check TLS Configuration: Use the JBoss CLI to inspect the HTTPS listener’s SSL context (assuming port 8443 is the default HTTPS listener):
+./bin/jboss-cli.sh --connect
+/subsystem=undertow/server=default-server/https-listener=https:read-resource(recursive=true)
+
+Look for the security-realm or ssl-context attribute. If using Elytron, check the SSL context:
+/subsystem=elytron/server-ssl-context=httpsSSC:read-resource
+
+
+
+/subsystem=elytron/server-ssl-context=httpsSSC:write-attribute(name=cipher-suite,value="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_AES_128_GCM_SHA256")
+/subsystem=elytron/server-ssl-context=httpsSSC:write-attribute(name=protocols,value=["TLSv1.2","TLSv1.3"])
+:reload
+
+
+
+Inspect Certificate: Use OpenSSL to view the certificate:
+bash
+openssl s_client -connect localhost:8443 -showcerts
