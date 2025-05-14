@@ -62,6 +62,8 @@ Look for the security-realm or ssl-context attribute. If using Elytron, check th
 /subsystem=elytron/server-ssl-context=httpsSSC:write-attribute(name=protocols,value=["TLSv1.2","TLSv1.3"])
 :reload
 
+openssl s_client -connect localhost:8443
+
 
 
 Inspect Certificate: Use OpenSSL to view the certificate:
