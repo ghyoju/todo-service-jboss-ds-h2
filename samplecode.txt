@@ -85,3 +85,46 @@ openssl s_client -connect localhost:8443
 Inspect Certificate: Use OpenSSL to view the certificate:
 bash
 openssl s_client -connect localhost:8443 -showcerts
+
+import javax.net.ssl.*;
+import java.io.IOException;
+import java.security.cert.X509Certificate;
+
+public class TLSDebugInsecureClient {
+
+    public static void main(String[] args) throws Exception {
+        String host = "your-jboss-hostname";
+        int port = 8443;
+
+        // Trust all certs (unsafe for prod)
+        TrustManager[] trustAllCerts = new TrustManager[]{
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() { return null; }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+                public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+            }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+        SSLSocketFactory factory = sslContext.getSocketFactory();
+        try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
+
+            // Optionally: set specific TLS version
+            socket.setEnabledProtocols(new String[]{"TLSv1.2", "TLSv1.3"});
+
+            socket.startHandshake();
+            SSLSession session = socket.getSession();
+            System.out.println("Connected with protocol: " + session.getProtocol());
+            System.out.println("Cipher suite: " + session.getCipherSuite());
+
+            for (Certificate cert : session.getPeerCertificates()) {
+                System.out.println("Certificate: " + ((X509Certificate) cert).getSubjectDN());
+            }
+
+        } catch (IOException e) {
+            System.err.println("Handshake failed: " + e.getMessage());
+        }
+    }
+}
