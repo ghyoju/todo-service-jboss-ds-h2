@@ -1,49 +1,65 @@
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import java.util.Arrays;
+import javax.net.ssl.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
-public class CipherSuites {
+public class TLSDebugClient {
+
     public static void main(String[] args) {
+        String host = "your-jboss-hostname"; // e.g., "localhost"
+        int port = 8443; // or your JBoss HTTPS port
+
         try {
-            // Create an SSLContext for TLS
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, null, null);
+            SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
 
-            // Get the factory from the SSLContext
-            SSLSocketFactory factory = sslContext.getSocketFactory();
+                // Enable all supported protocols (including TLS 1.2, TLS 1.3)
+                socket.setEnabledProtocols(socket.getSupportedProtocols());
 
-            // Create a temporary socket to get enabled/supported ciphers
-            try (SSLSocket socket = (SSLSocket) factory.createSocket()) {
-                String[] supportedCiphers = socket.getSupportedCipherSuites();
-                String[] enabledCiphers = socket.getEnabledCipherSuites();
+                // Start handshake to initiate SSL/TLS
+                socket.startHandshake();
 
-                System.out.println("Supported Ciphers:");
-                Arrays.stream(supportedCiphers).forEach(System.out::println);
+                // Print session info
+                SSLSession session = socket.getSession();
+                System.out.println("Connected to: " + session.getPeerHost());
+                System.out.println("Protocol: " + session.getProtocol());
+                System.out.println("Cipher suite: " + session.getCipherSuite());
 
-                System.out.println("\nEnabled Ciphers:");
-                Arrays.stream(enabledCiphers).forEach(System.out::println);
+                // Print certificates
+                Certificate[] certs = session.getPeerCertificates();
+                for (int i = 0; i < certs.length; i++) {
+                    System.out.println("\nCertificate " + (i + 1) + ":");
+                    if (certs[i] instanceof X509Certificate) {
+                        X509Certificate x509 = (X509Certificate) certs[i];
+                        System.out.println("  Subject: " + x509.getSubjectDN());
+                        System.out.println("  Issuer: " + x509.getIssuerDN());
+                        System.out.println("  Valid From: " + x509.getNotBefore());
+                        System.out.println("  Valid Until: " + x509.getNotAfter());
+                        System.out.println("  Serial Number: " + x509.getSerialNumber());
+                    } else {
+                        System.out.println("  Certificate Type: " + certs[i].getType());
+                    }
+                }
+
+                // Print supported protocols
+                System.out.println("\nSupported Protocols:");
+                for (String protocol : socket.getSupportedProtocols()) {
+                    System.out.println("  " + protocol);
+                }
+
+                // Print enabled protocols
+                System.out.println("\nEnabled Protocols:");
+                for (String protocol : socket.getEnabledProtocols()) {
+                    System.out.println("  " + protocol);
+                }
+
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SSLHandshakeException e) {
+            System.err.println("SSL Handshake failed: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Connection error: " + e.getMessage());
         }
-    }
-}
-
-
-
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import java.util.Arrays;
-
-public class SSLCheck {
-    public static void main(String[] args) throws Exception {
-        SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-        SSLSocket socket = (SSLSocket) factory.createSocket();
-        System.out.println("Supported Protocols: " + Arrays.toString(socket.getSupportedProtocols()));
-        System.out.println("Enabled Protocols: " + Arrays.toString(socket.getEnabledProtocols()));
-        System.out.println("Supported Ciphers: " + Arrays.toString(socket.getSupportedCipherSuites()));
-        System.out.println("Enabled Ciphers: " + Arrays.toString(socket.getEnabledCipherSuites()));
     }
 }
 
