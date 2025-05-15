@@ -80,12 +80,11 @@ Look for the security-realm or ssl-context attribute. If using Elytron, check th
 
 openssl s_client -connect localhost:8443
 
-
-
 Inspect Certificate: Use OpenSSL to view the certificate:
 bash
 openssl s_client -connect localhost:8443 -showcerts
 
+openssl s_client -connect your-jboss-hostname:8443 -tls1_2
 -------------------------
 
 import javax.net.ssl.*;
