@@ -171,3 +171,39 @@ public class MinimalTlsTest {
     }
 }
 
+-----
+
+import java.io.*;
+import java.net.Socket;
+
+public class JBossHttpClient {
+    public static void main(String[] args) {
+        String host = "localhost";
+        int port = 8080;
+
+        try (Socket socket = new Socket(host, port)) {
+            // Send a basic HTTP GET request
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("GET / HTTP/1.1");
+            writer.println("Host: " + host);
+            writer.println("Connection: close");
+            writer.println(); // Blank line ends headers
+
+            // Read and print the response
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(socket.getInputStream())
+            );
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+
+        } catch (IOException e) {
+            System.err.println("❌ Failed to connect: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+
+
