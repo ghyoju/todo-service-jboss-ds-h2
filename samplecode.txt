@@ -211,6 +211,12 @@ System.setProperty("jakarta.xml.bind.context.factory", "org.eclipse.persistence.
 
 Map<String, Object> properties = new HashMap<>();
 properties.put("jakarta.xml.bind.context.factory", "org.eclipse.persistence.jaxb.JAXBContextFactory");
-
 JAXBContext context = JAXBContext.newInstance(MyClass.class, properties);
+
+
+Map<String, Object> properties = new HashMap<>();
+// Add MOXy-specific properties if needed
+JAXBContext context = JAXBContextFactory.createContext(new Class[] { MyClass.class }, properties);
+
+
 
