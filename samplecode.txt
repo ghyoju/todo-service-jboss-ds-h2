@@ -207,4 +207,10 @@ public class JBossHttpClient {
 }
 
 
-System.setProperty("jakarta.xml.bind.context.factory", "org.eclipse.persistence.jaxb.JAXBContextFactory");
+System.setProperty("jakarta.xml.bind.context.factory", "org.eclipse.persistence.jaxb.JAXBContextFactory
+
+Map<String, Object> properties = new HashMap<>();
+properties.put("jakarta.xml.bind.context.factory", "org.eclipse.persistence.jaxb.JAXBContextFactory");
+
+JAXBContext context = JAXBContext.newInstance(MyClass.class, properties);
+
