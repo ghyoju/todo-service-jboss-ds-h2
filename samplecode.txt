@@ -219,4 +219,17 @@ Map<String, Object> properties = new HashMap<>();
 JAXBContext context = JAXBContextFactory.createContext(new Class[] { MyClass.class }, properties);
 
 
+<jboss-deployment-structure>
+    <deployment>
+        <exclude-subsystems>
+            <subsystem name="jaxb" />
+        </exclude-subsystems>
+        <exclusions>
+            <module name="org.glassfish.jaxb" />
+        </exclusions>
+        <dependencies>
+            <module name="org.eclipse.persistence.moxy" services="import"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>
 
