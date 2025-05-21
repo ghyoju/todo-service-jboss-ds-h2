@@ -233,3 +233,5 @@ JAXBContext context = JAXBContextFactory.createContext(new Class[] { MyClass.cla
     </deployment>
 </jboss-deployment-structure>
 
+mvn dependency:tree | grep osgi-resource-locator
+
