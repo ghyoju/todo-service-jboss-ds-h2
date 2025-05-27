@@ -1,3 +1,25 @@
+package com.example.client;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.example.service.TodoServiceImpl;
+
+import jakarta.xml.bind.JAXBContext;
+
+public class Client2 {
+
+	
+	public static void main(String[] args) throws Exception {
+		Map<String, Object> properties = new HashMap<>();
+        // Add any specific properties if needed
+        JAXBContext context = JAXBContext.newInstance(new Class[]{TodoServiceImpl.class}, properties);
+        System.out.println("JAXBContext created: " + context);
+        
+    }
+
+}
+-------------------
 <module xmlns="urn:jboss:module:1.9" name="org.glassfish.hk2.osgiresourcelocator">
     <resources>
         <resource-root path="osgi-resource-locator-3.0.4.jar"/>
@@ -6,6 +28,8 @@
         <module name="javax.api"/>
         <module name="org.glassfish.hk2.api"/> <!-- If required -->
     </dependencies>
+
+
 </module>
 -----------------
 
