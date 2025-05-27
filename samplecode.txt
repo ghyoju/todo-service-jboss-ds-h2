@@ -1,3 +1,14 @@
+<module xmlns="urn:jboss:module:1.9" name="org.glassfish.hk2.osgiresourcelocator">
+    <resources>
+        <resource-root path="osgi-resource-locator-3.0.4.jar"/>
+    </resources>
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="org.glassfish.hk2.api"/> <!-- If required -->
+    </dependencies>
+</module>
+-----------------
+
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.InetAddress;
