@@ -1,3 +1,29 @@
+jboss-deployment-structure.xml
+<jboss-deployment-structure>
+    <deployment>
+        <dependencies>
+            <module name="custom.jakarta.xml.bind.impl"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>
+----
+
+module.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.9" name="custom.jakarta.xml.bind.impl">
+    <resources>
+        <resource-root path="jakarta.xml.bind-api-4.0.0.jar"/>
+        <resource-root path="jakarta.activation-api-2.1.1.jar"/>
+        <resource-root path="jaxb-runtime-4.0.3.jar"/>
+        <resource-root path="jaxb-core-4.0.3.jar"/>
+    </resources>
+    <dependencies>
+        <module name="java.base"/>
+    </dependencies>
+</module>
+
+----
+
 package com.example.client;
 
 import java.util.HashMap;
