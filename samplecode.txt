@@ -2,6 +2,22 @@ Map<String, Object> properties = new HashMap<>();
 properties.put("jakarta.xml.bind.context.factory", "org.glassfish.jaxb.runtime.v2.ContextFactory");
 JAXBContext context = JAXBContext.newInstance(new Class[]{TodoServiceImpl.class}, properties);
 -------------------
+
+<!-- MOXy -->
+<dependency>
+    <groupId>org.eclipse.persistence</groupId>
+    <artifactId>org.eclipse.persistence.moxy</artifactId>
+    <version>3.0.2</version> <!-- or 4.x if you're using Jakarta EE 10+ -->
+</dependency>
+
+<!-- EclipseLink Core (required by MOXy) -->
+<dependency>
+    <groupId>org.eclipse.persistence</groupId>
+    <artifactId>org.eclipse.persistence.core</artifactId>
+    <version>3.0.2</version>
+</dependency>
+
+
 <dependency>
     <groupId>jakarta.xml.bind</groupId>
     <artifactId>jakarta.xml.bind-api</artifactId>
