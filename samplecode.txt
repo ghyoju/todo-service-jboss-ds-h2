@@ -2,7 +2,11 @@ Map<String, Object> properties = new HashMap<>();
 properties.put("jakarta.xml.bind.context.factory", "org.glassfish.jaxb.runtime.v2.ContextFactory");
 JAXBContext context = JAXBContext.newInstance(new Class[]{TodoServiceImpl.class}, properties);
 -------------------
-
+<dependency>
+    <groupId>org.glassfish.hk2</groupId>
+    <artifactId>osgiresourcelocator</artifactId>
+    <version>1.0.1</version>
+</dependency>
 <!-- MOXy -->
 <dependency>
     <groupId>org.eclipse.persistence</groupId>
