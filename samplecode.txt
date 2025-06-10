@@ -16,6 +16,8 @@
     </execution>
   </executions>
 </plugin>
+
+java -cp target/classes:target/libs/* com.example.YourMainClass
 -----------------
 
 Map<String, Object> properties = new HashMap<>();
