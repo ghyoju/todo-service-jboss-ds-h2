@@ -1,3 +1,23 @@
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-dependency-plugin</artifactId>
+  <version>3.6.0</version>
+  <executions>
+    <execution>
+      <id>copy-dependencies</id>
+      <phase>package</phase>
+      <goals>
+        <goal>copy-dependencies</goal>
+      </goals>
+      <configuration>
+        <outputDirectory>${project.build.directory}/libs</outputDirectory>
+        <includeScope>runtime</includeScope>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+-----------------
+
 Map<String, Object> properties = new HashMap<>();
 properties.put("jakarta.xml.bind.context.factory", "org.glassfish.jaxb.runtime.v2.ContextFactory");
 JAXBContext context = JAXBContext.newInstance(new Class[]{TodoServiceImpl.class}, properties);
