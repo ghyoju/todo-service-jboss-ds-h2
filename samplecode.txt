@@ -1,48 +1,69 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:tx="http://www.springframework.org/schema/tx"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-                           http://www.springframework.org/schema/beans/spring-beans.xsd
-                           http://www.springframework.org/schema/context
-                           http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/tx
-                           http://www.springframework.org/schema/tx/spring-tx.xsd">
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.orm.hibernate6.HibernateTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Query;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-    <!-- Enable annotation-driven transaction management -->
-    <tx:annotation-driven transaction-manager="transactionManager"/>
+public class UserServiceTest {
+    private ApplicationContext context;
+    private EntityManagerFactory entityManagerFactory;
+    private HibernateTransactionManager transactionManager;
 
-    <!-- DataSource configuration (e.g., HikariCP) -->
-    <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
-        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/yourdb"/>
-        <property name="username" value="yourusername"/>
-        <property name="password" value="yourpassword"/>
-        <property name="maximumPoolSize" value="10"/>
-        <property name="minimumIdle" value="5"/>
-        <property name="idleTimeout" value="300000"/>
-    </bean>
+    @BeforeEach
+    public void setUp() {
+        // Load Spring context from applicationContext.xml
+        context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        entityManagerFactory = context.getBean(EntityManagerFactory.class);
+        transactionManager = context.getBean(HibernateTransactionManager.class);
+    }
 
-    <!-- Hibernate SessionFactory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSource"/>
-        <property name="packagesToScan" value="com.yourpackage.entity"/>
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
-                <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">true</prop>
-            </props>
-        </property>
-    </bean>
+    @Test
+    public void testNativeQueryWithTransaction() {
+        // Create transaction definition
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
+        
+        // Start transaction
+        TransactionStatus status = transactionManager.getTransaction(def);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-    <!-- Transaction Manager -->
-    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
-        <property name="sessionFactory" ref="sessionFactory"/>
-        <property name="dataSource" ref="dataSource"/>
-    </bean>
+        try {
+            // Begin the transaction
+            entityManager.getTransaction().begin();
 
-    <!-- Component scan for services and DAOs -->
-    <context:component-scan base-package="com.yourpackage"/>
-</beans>
+            // Example native query
+            Query nativeQuery = entityManager.createNativeQuery(
+                "SELECT * FROM users WHERE active = :activeStatus");
+            nativeQuery.setParameter("activeStatus", true);
+            
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = nativeQuery.getResultList();
+
+            // Process results
+            assertNotNull(results);
+            
+            // Commit transaction
+            entityManager.getTransaction().commit();
+            transactionManager.commit(status);
+        } catch (Exception e) {
+            // Rollback in case of error
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            transactionManager.rollback(status);
+            fail("Test failed with exception: " + e.getMessage());
+        } finally {
+            // Close EntityManager
+            if (entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+    }
+}
