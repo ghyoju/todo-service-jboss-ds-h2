@@ -1,0 +1,71 @@
+package com.example.service;
+
+import com.example.model.User;
+import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class UserServiceTest {
+
+    private ApplicationContext context;
+    private UserService userService;
+    private HibernateTransactionManager transactionManager;
+    private SessionFactory sessionFactory;
+
+    @BeforeEach
+    void setUp() {
+        // Load Spring context
+        context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        userService = context.getBean(UserService.class);
+        transactionManager = context.getBean(HibernateTransactionManager.class);
+        sessionFactory = context.getBean(SessionFactory.class);
+    }
+
+    @Test
+    void testSaveAndFindUser() {
+        // Create a transaction definition
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
+        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
+
+        // Start a transaction
+        TransactionStatus status = transactionManager.getTransaction(def);
+
+        try {
+            // Create and save a user
+            User user = new User();
+            user.setId(1L);
+            user.setName("John Doe");
+            userService.saveUser(user);
+
+            // Commit the transaction
+            transactionManager.commit(status);
+
+            // Start a new transaction for reading
+            status = transactionManager.getTransaction(def);
+            User foundUser = userService.findUserById(1L);
+
+            // Verify the result
+            assertNotNull(foundUser);
+            assertEquals("John Doe", foundUser.getName());
+
+            // Commit the read transaction
+            transactionManager.commit(status);
+        } catch (Exception e) {
+            // Rollback in case of error
+            transactionManager.rollback(status);
+            throw e;
+        } finally {
+            // Clean up: close the session factory to avoid resource leaks
+            sessionFactory.close();
+        }
+    }
+}
