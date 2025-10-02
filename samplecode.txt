@@ -1,69 +1,60 @@
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.orm.hibernate6.HibernateTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Query;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Objects;
 
-public class UserServiceTest {
-    private ApplicationContext context;
-    private EntityManagerFactory entityManagerFactory;
-    private HibernateTransactionManager transactionManager;
+public class PolicyDataResponse {
+    private Short applicationYr;
+    private String policyNum;
+    private List<Group> list;
 
-    @BeforeEach
-    public void setUp() {
-        // Load Spring context from applicationContext.xml
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        entityManagerFactory = context.getBean(EntityManagerFactory.class);
-        transactionManager = context.getBean(HibernateTransactionManager.class);
+    // getters and setters (if needed)
+    public Short getApplicationYr() {
+        return applicationYr;
     }
 
-    @Test
-    public void testNativeQueryWithTransaction() {
-        // Create transaction definition
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
-        
-        // Start transaction
-        TransactionStatus status = transactionManager.getTransaction(def);
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+    public void setApplicationYr(Short applicationYr) {
+        this.applicationYr = applicationYr;
+    }
 
-        try {
-            // Begin the transaction
-            entityManager.getTransaction().begin();
+    public String getPolicyNum() {
+        return policyNum;
+    }
 
-            // Example native query
-            Query nativeQuery = entityManager.createNativeQuery(
-                "SELECT * FROM users WHERE active = :activeStatus");
-            nativeQuery.setParameter("activeStatus", true);
-            
-            @SuppressWarnings("unchecked")
-            List<Object[]> results = nativeQuery.getResultList();
+    public void setPolicyNum(String policyNum) {
+        this.policyNum = policyNum;
+    }
 
-            // Process results
-            assertNotNull(results);
-            
-            // Commit transaction
-            entityManager.getTransaction().commit();
-            transactionManager.commit(status);
-        } catch (Exception e) {
-            // Rollback in case of error
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            transactionManager.rollback(status);
-            fail("Test failed with exception: " + e.getMessage());
-        } finally {
-            // Close EntityManager
-            if (entityManager.isOpen()) {
-                entityManager.close();
-            }
-        }
+    public List<Group> getList() {
+        return list;
+    }
+
+    public void setList(List<Group> list) {
+        this.list = list;
+    }
+
+    // equals
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PolicyDataResponse)) return false;
+        PolicyDataResponse that = (PolicyDataResponse) o;
+        return Objects.equals(applicationYr, that.applicationYr) &&
+               Objects.equals(policyNum, that.policyNum) &&
+               Objects.equals(list, that.list);
+    }
+
+    // hashCode
+    @Override
+    public int hashCode() {
+        return Objects.hash(applicationYr, policyNum, list);
+    }
+
+    // optional: toString
+    @Override
+    public String toString() {
+        return "PolicyDataResponse[" +
+               "applicationYr=" + applicationYr +
+               ", policyNum=" + policyNum +
+               ", list=" + list +
+               ']';
     }
 }
