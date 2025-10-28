@@ -1,71 +1,117 @@
-package com.example.service;
+package com.example.ws;
 
-import com.example.model.User;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
+import javax.annotation.Resource;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+import javax.xml.soap.*;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
+import java.util.Iterator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+@WebService
+public class DemoService {
 
-public class UserServiceTest {
+    @Resource
+    private WebServiceContext wsCtx;
 
-    private ApplicationContext context;
-    private UserService userService;
-    private HibernateTransactionManager transactionManager;
-    private SessionFactory sessionFactory;
-
-    @BeforeEach
-    void setUp() {
-        // Load Spring context
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        userService = context.getBean(UserService.class);
-        transactionManager = context.getBean(HibernateTransactionManager.class);
-        sessionFactory = context.getBean(SessionFactory.class);
+    @WebMethod
+    public String echo(String payload) {
+        printSoapHeaderInfo();
+        return "Echo: " + payload;
     }
 
-    @Test
-    void testSaveAndFindUser() {
-        // Create a transaction definition
-        DefaultTransactionDefinition def = new DefaultTransactionDefinition();
-        def.setPropagationBehavior(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
-
-        // Start a transaction
-        TransactionStatus status = transactionManager.getTransaction(def);
-
+    /** --------------------------------------------------------------
+     *  Print everything that is in the SOAP header
+     *  -------------------------------------------------------------- */
+    private void printSoapHeaderInfo() {
         try {
-            // Create and save a user
-            User user = new User();
-            user.setId(1L);
-            user.setName("John Doe");
-            userService.saveUser(user);
+            // 1. Get the SOAPMessageContext
+            MessageContext mc = wsCtx.getMessageContext();
+            SOAPMessageContext soapCtx = (SOAPMessageContext) mc;
 
-            // Commit the transaction
-            transactionManager.commit(status);
+            // 2. Get the SOAP message
+            SOAPMessage msg = soapCtx.getMessage();
 
-            // Start a new transaction for reading
-            status = transactionManager.getTransaction(def);
-            User foundUser = userService.findUserById(1L);
+            // 3. Get the header (may be null)
+            SOAPHeader header = msg.getSOAPHeader();
+            if (header == null) {
+                System.out.println("=== SOAP HEADER IS EMPTY ===");
+                return;
+            }
 
-            // Verify the result
-            assertNotNull(foundUser);
-            assertEquals("John Doe", foundUser.getName());
+            System.out.println("=== FULL SOAP HEADER (pretty-printed) ===");
+            System.out.println(prettyPrintHeader(header));
 
-            // Commit the read transaction
-            transactionManager.commit(status);
-        } catch (Exception e) {
-            // Rollback in case of error
-            transactionManager.rollback(status);
-            throw e;
-        } finally {
-            // Clean up: close the session factory to avoid resource leaks
-            sessionFactory.close();
+            System.out.println("\n=== DETAILED HEADER ELEMENTS ===");
+            printHeaderElements(header);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /** --------------------------------------------------------------
+     *  Pretty-print the whole <soap:Header> element
+     *  -------------------------------------------------------------- */
+    private String prettyPrintHeader(SOAPHeader header) throws Exception {
+        // Create a new SOAPMessage that contains ONLY the header
+        SOAPMessage tmp = MessageFactory.newInstance().createMessage();
+        tmp.getSOAPPart().getEnvelope().addHeader().appendChild(
+                tmp.getSOAPPart().importNode(header, true));
+
+        // Transform to String with indentation
+        TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setAttribute("indent-number", 2);
+        Transformer t = tf.newTransformer();
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+
+        StringWriter sw = new StringWriter();
+        t.transform(new DOMSource(tmp.getSOAPPart()), new StreamResult(sw));
+        return sw.toString();
+    }
+
+    /** --------------------------------------------------------------
+     *  Walk through every child element of the header and print details
+     *  -------------------------------------------------------------- */
+    private void printHeaderElements(SOAPHeader header) throws SOAPException {
+        Iterator<Node> it = header.getChildElements();
+        int idx = 1;
+
+        while (it.hasNext()) {
+            Node node = it.next();
+            if (!(node instanceof SOAPElement)) {
+                continue; // skip text nodes, comments, etc.
+            }
+
+            SOAPElement el = (SOAPElement) node;
+            System.out.println("\n--- Header #" + idx++ + " ---");
+            System.out.println("  QName          : " + el.getElementQName());
+            System.out.println("  LocalName      : " + el.getLocalName());
+            System.out.println("  NamespaceURI   : " + el.getNamespaceURI());
+            System.out.println("  Prefix         : " + el.getPrefix());
+            System.out.println("  Value (text)   : " + el.getValue());
+
+            // Attributes
+            Iterator<Attr> attrIt = el.getAllAttributes();
+            if (attrIt.hasNext()) {
+                System.out.println("  Attributes:");
+                while (attrIt.hasNext()) {
+                    Attr a = attrIt.next();
+                    System.out.println("    " + a.getNodeName() + " = " + a.getValue());
+                }
+            } else {
+                System.out.println("  Attributes     : <none>");
+            }
+
+            // MustUnderstand / Role (actor) – SOAP-specific
+            System.out.println("  mustUnderstand : " + header.getMustUnderstand(el));
+            String role = header.getActor(el);
+            System.out.println("  role/actor     : " + (role == null ? "<default>" : role));
         }
     }
 }
