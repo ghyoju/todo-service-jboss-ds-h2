@@ -58,3 +58,4 @@ public class PolicyDataResponse {
                ']';
     }
 }
+//wsimport -keep -p com.example.soapclient http://localhost:8080/service?wsdl
