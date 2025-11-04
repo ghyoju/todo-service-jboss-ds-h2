@@ -1,56 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
-    <Appenders>
-        <!-- Rolling File Appender -->
-        <RollingFile name="RollingFile"
-                     fileName="logs/app.log"
-                     filePattern="logs/archive/app-%d{yyyy-MM-dd}-%i.log.gz">
-
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-
-            <Policies>
-                <!-- Rollover every day -->
-                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
-                <!-- Rollover when file reaches 10MB -->
-                <SizeBasedTriggeringPolicy size="10MB" />
-            </Policies>
-
-            <DefaultRolloverStrategy max="100" fileIndex="min" />
-        </RollingFile>
-    </Appenders>
-
-    <Loggers>
-        <Root level="info">
-            <AppenderRef ref="RollingFile" />
-        </Root>
-    </Loggers>
-
-    <!-- Delete logs older than 10 days -->
-    <CustomLevels>
-        <CustomLevel name="EXPIRE" intLevel="250" />
-    </CustomLevels>
+    <Properties>
+        <!-- Log file location -->
+        <Property name="LOG_DIR">./logs</Property>
+        <Property name="LOG_FILE_NAME">app.log</Property>
+    </Properties>
 
     <Appenders>
-        <RollingFile name="RollingFile"
-                     fileName="logs/app.log"
-                     filePattern="logs/archive/app-%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        <RollingFile name="RollingFileAppender"
+                     fileName="${LOG_DIR}/${LOG_FILE_NAME}"
+                     filePattern="${LOG_DIR}/%d{yyyy-MM-dd}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}-%i.gz">
+            <!-- Daily rollover + size-based trigger -->
             <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="10MB"/>
+                <!-- Time-based: rollover every day at midnight -->
+                <TimeBasedTriggeringPolicy />
+
+                <!-- Size-based: rollover when file reaches 10 MB -->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="100" fileIndex="min">
-                <Delete basePath="logs/archive" maxDepth="1">
-                    <IfFileName glob="app-*.log.gz" />
+
+            <!-- Delete files older than 10 days -->
+            <DefaultRolloverStrategy max="999">
+                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*/${LOG_FILE_NAME}.*.gz" />
                     <IfLastModified age="10d" />
                 </Delete>
             </DefaultRolloverStrategy>
+
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
         </RollingFile>
     </Appenders>
 
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="RollingFileAppender"/>
         </Root>
     </Loggers>
 </Configuration>
